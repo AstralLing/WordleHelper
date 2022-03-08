@@ -1,7 +1,10 @@
-# WordleHelper
-Build:
+A simple wordle game helper with better algorithm. Release edition is coming soon:)
+
+Early build:
 ```
-g++ wlh.h main.cpp wordle.cpp -o wlh-alpha2.0.1.220308 -std=c++17 -O2
+g++ wlh.h main.cpp wordle.cpp -o <BinaryFileName> -std=c++17 -O2
 ```
 
-Putting dictionary files in the same folder, named `<[0,7]>.txt`.
+To let the program recognize dictionary files, putting them(your customized or default in this repo) in the same folder, files named `<[0,7]>.txt`.
+
+Have fun!
