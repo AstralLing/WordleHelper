@@ -90,7 +90,7 @@ class Wordle {
         std::cout << "* Guess: " << sieve[guessWordID] << "\n";
         lastGuess = sieve[guessWordID];
         optimizedFlag = 1;
-      } else if (OPTIMIZE2 && dictionary.size() < 100) {
+      } else if (OPTIMIZE2 && dictionary.size() < 100 && dictionary.size() > 2) {
         finderWork();
         if (!finder.empty()) {
           int guessWordID = randNum(0, (int)finder.size() - 1);
