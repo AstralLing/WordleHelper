@@ -5,11 +5,12 @@ class Wordle {
   const std::string BEST[8] = {"taes",       "crane",      "visaed",
                                "spaeing",    "dioptase",   "kopasetic",
                                "proteinase", "seaborgiums"};
-  const int MIN_WORD_LENGTH = 4, MAX_WORD_LENGTH = 11;
+  const int MIN_WORD_LENGTH = 4, MAX_WORD_LENGTH = 11,
+            BEGIN_OPTIMIZE = 2, END_OPTIMIZE = 3;
 
-  bool ENABLE_DETAILS = false;
+  bool ENABLE_DETAILS = false, ENABLE_OPTIMIZE = false;
 
-  std::vector<std::string> dictionary;
+  std::vector<std::string> dictionary, sieve;
 
   // Customized string.find()
   static inline std::vector<int> findLetter(std::string s, char letter) {
@@ -27,8 +28,9 @@ class Wordle {
   int gameTurns = 1, gameWordLength = 5;
   std::string lastGuess;
 
-  void init(bool showDetail = false) {
+  void init(bool showDetail = false, bool useOptimizeSolution = false) {
     if (showDetail) ENABLE_DETAILS = true;
+    if (useOptimizeSolution) ENABLE_OPTIMIZE = true;
 
     std::cout << "* Wordle on! Enter the length of your word.\n";
     while (1) {
@@ -76,9 +78,17 @@ class Wordle {
     if (ENABLE_DETAILS)
       std::cout << "* Remain " << dictionary.size() << " possible words.\n";
 
-    int guessWordID = randNum(0, (int)dictionary.size() - 1);
-    std::cout << "* Guess: " << dictionary[guessWordID] << "\n";
-    lastGuess = dictionary[guessWordID];
+    if (ENABLE_OPTIMIZE && gameTurns >= BEGIN_OPTIMIZE &&
+        gameTurns <= END_OPTIMIZE && !sieve.empty() && dictionary.size() > 3) {
+      std::cerr << "QAQ\n";
+      int guessWordID = randNum(0, (int)sieve.size() - 1);
+      std::cout << "* Guess: " << sieve[guessWordID] << "\n";
+      lastGuess = sieve[guessWordID];
+    } else {
+      int guessWordID = randNum(0, (int)dictionary.size() - 1);
+      std::cout << "* Guess: " << dictionary[guessWordID] << "\n";
+      lastGuess = dictionary[guessWordID];
+    }
 
     return;
   }
@@ -96,18 +106,41 @@ class Wordle {
         ++i;
       }
     }
+
+    if (ENABLE_OPTIMIZE && gameTurns >= BEGIN_OPTIMIZE && gameTurns <= END_OPTIMIZE) {
+      for (int i = 0; i < sieve.size();) {
+        auto result = findLetter(sieve[i], letter);
+        if (result.size() != 0) {
+          swap(sieve[i], sieve.back());
+          sieve.pop_back();
+        } else {
+          ++i;
+        }
+      }
+    }
   }
 
   void checkConfirmed(int pos, char letter) {
     if (ENABLE_DETAILS)
       std::cout << "Checking: " << letter << " at " << pos << ".\n";
-      
+
     for (int i = 0; i < dictionary.size();) {
       if (dictionary[i][pos] != letter) {
         swap(dictionary[i], dictionary.back());
         dictionary.pop_back();
       } else {
         ++i;
+      }
+    }
+
+    if (ENABLE_OPTIMIZE && gameTurns >= BEGIN_OPTIMIZE && gameTurns <= END_OPTIMIZE) {
+      for (int i = 0; i < sieve.size();) {
+        if (sieve[i][pos] == letter) {
+          swap(sieve[i], sieve.back());
+          sieve.pop_back();
+        } else {
+          ++i;
+        }
       }
     }
   }
@@ -137,12 +170,39 @@ class Wordle {
         }
       }
     }
+
+    if (ENABLE_OPTIMIZE && gameTurns >= BEGIN_OPTIMIZE && gameTurns <= END_OPTIMIZE) {
+      for (int i = 0; i < sieve.size();) {
+        auto result = findLetter(sieve[i], letter);
+        if (result.size() < appearTimes) {  // Note: not wrongPos.size()
+          swap(sieve[i], sieve.back());
+          sieve.pop_back();
+        } else {
+          bool illegal = 0;
+          for (auto j : wrongPos)
+            if (sieve[i][j] == letter) {
+              illegal = 1;
+              break;
+            }
+          if (illegal) {
+            swap(sieve[i], sieve.back());
+            sieve.pop_back();
+          } else {
+            ++i;
+          }
+        }
+      }
+    }
   }
 
   void solveGame(std::string guessedWord, std::string gameResult) {
     std::map<char, std::vector<int>> wrongPos;
     std::map<char, int> letterCnt;
     std::vector<char> receivedZero;
+
+    if (ENABLE_OPTIMIZE && gameTurns >= BEGIN_OPTIMIZE && gameTurns <= END_OPTIMIZE)
+      sieve = dictionary;
+    std::cerr << gameTurns << " " << sieve.size() << "\n";
 
     for (int i = 0; i < gameResult.size(); ++i) {
       if (gameResult[i] == '0')
@@ -169,11 +229,11 @@ class newGame : public Wordle {
   std::string gameResult;
 
  public:
-  void play(bool showDetail) {
+  void play(int option) {
     std::cout << "- Usage: 0 means not exist, 1 means correct, 2 means wrong "
                  "position. e.g.\"01201\".\n  If guessed right, enter a single "
                  "\"-1\" to close the game.\n";
-    init(showDetail);
+    init(option & (1 << 10), option & (1 << 11));
 
     while (gameTurns <= MAX_GAME_TURNS) {
       guess();
@@ -224,11 +284,11 @@ class continueGame : public Wordle {
   std::string userWord, gameResult;
 
  public:
-  void play(bool showDetail) {
+  void play(int option) {
     std::cout << "- Usage: 0 means not exist, 1 means correct, 2 means wrong "
                  "position. e.g.\"01201\".\n  If guessed right, enter a single "
                  "\"-1\" to close the game.\n";
-    init(showDetail);
+    init(option & (1 << 10));
 
     std::cout << "- Enter the times you have guessed.\n";
     do {
@@ -315,16 +375,10 @@ class continueGame : public Wordle {
 void playWordle(int option) {
   if (option & (1 << 2)) {
     newGame game;
-    if (option & (1 << 10))
-      game.play(1);
-    else
-      game.play(0);
+    game.play(option);
   } else {
     continueGame game;
-    if (option & (1 << 10))
-      game.play(1);
-    else
-      game.play(0);
+    game.play(option);
   }
   return;
 }
