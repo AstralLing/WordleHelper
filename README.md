@@ -1,3 +1,4 @@
+#### WordleHelper
 A simple wordle game helper with better algorithm. Release edition is coming soon:)
 
 Early build:
@@ -7,7 +8,7 @@ g++ wlh.h main.cpp wordle.cpp -o <BinaryFileName> -std=c++17 -O2
 
 To let the program recognize dictionary files, putting them(your customized or default in this repo) in the same folder, files named `<[0,7]>.txt`.
 
-CLI HELP
+#### cli help
 ```
     -W: play a wordle game. (default)
     -N: play a numberle game.
@@ -18,6 +19,7 @@ CLI HELP
 ```
 Both format like "-W -n -o" and "-Won" can be recognized.
 
+#### About
 The optimization avoids some terrible situations, such as when you have to guess a word between 'birth', 'mirth', 'firth' and so on. You can test it by the word 'birth', which is difficult to be guessed out while using the default seed and unoptimized algo.
 
 Hope you are not tired of reading my poor English. [Here](https://wordlegame.org/) and [here](https://www.nytimes.com/games/wordle/index.html) provide nice online wordle game. GLHF!
