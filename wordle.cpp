@@ -115,7 +115,7 @@ class Wordle {
   void checkAppear(std::vector<int> wrongPos, char letter, int appearTimes) {
     if (ENABLE_DETAILS)
       std::cout << "Checking: " << letter << " appears " << appearTimes
-                << "times.\n";
+                << " times.\n";
 
     for (int i = 0; i < dictionary.size();) {
       auto result = findLetter(dictionary[i], letter);
