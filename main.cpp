@@ -31,6 +31,9 @@ int main(int argc, char *argv[]) {
         case 'd':
           option |= 1 << 10;
           break;
+        case 'o':
+          option |= 1 << 11;
+          break;
         case 'h':
           option |= 1 << 30;
           break;
@@ -46,13 +49,15 @@ int main(int argc, char *argv[]) {
   if (option >> 31) {
     std::cout << "Illegal option found, try again or use -help for help.\n";
   } else if (!option || option & (1 << 30)) {
-    std::cout
-        << "    -W: play a wordle game. (default)\n"
-           "    -N: play a numberle game.\n"
-           "    -n: start a new game, the program will solve it automatically. (default)\n"
-           "    -c: continue your game, input the information you already got and "
-           "the program will show advice.\n"
-           "    -d: show details during game.\n";
+    std::cout << "    -W: play a wordle game. (default)\n"
+                 "    -N: play a numberle game.\n"
+                 "    -n: start a new game, the program will solve it "
+                 "automatically. (default)\n"
+                 "    -c: continue your game, input the information you "
+                 "already got and the program will show advice.\n"
+                 "    -d: show details during game.\n"
+                 "    -o: use experimental optimized algorithm, probably "
+                 "only works better when the word is short.";
   } else if (option & (1 << 0) && option & (1 << 1) ||
              option & (1 << 2) && option & (1 << 3)) {
     std::cout << "Option conflicted, use -help for help.\n";
