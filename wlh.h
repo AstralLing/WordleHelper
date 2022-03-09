@@ -8,6 +8,7 @@
 #include <map>
 #include <random>
 #include <vector>
+#include <algorithm>
 void playNumberle(int);
 void playWordle(int);
 unsigned int simpleHash(char *);
