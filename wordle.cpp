@@ -5,9 +5,10 @@ class Wordle {
   const std::string BEST[8] = {"taes",       "crane",      "visaed",
                                "spaeing",    "dioptase",   "kopasetic",
                                "proteinase", "seaborgiums"};
-  const int MIN_WORD_LENGTH = 4, MAX_WORD_LENGTH = 11, BEGIN_OPTIMIZE = 2,
+  const int MIN_WORD_LENGTH = 4, MAX_WORD_LENGTH = 11, BEGIN_OPTIMIZE = 3,
             END_OPTIMIZE = 4;
 
+  // Optimize1: tmp cancel the limit of '2'. Optimize2: only find the last letters.
   bool ENABLE_DETAILS = false, ENABLE_OPTIMIZE = false, OPTIMIZE1 = false,
        OPTIMIZE2 = false;
 
@@ -58,7 +59,7 @@ class Wordle {
     sieve = dictionary;
     finder = dictionary;
 
-    for (int i = 0; i < sieve.size(); ++i) {
+    for (int i = 0; i < sieve.size();) {
       bool illegal = 0;
       for (auto j : sieve[i])
         if (findLetter(sieve[i], j).size() > 1) {
@@ -68,6 +69,8 @@ class Wordle {
       if (illegal) {
         std::swap(sieve[i], sieve.back());
         sieve.pop_back();
+      } else {
+        ++i;
       }
     }
 
@@ -143,10 +146,11 @@ class Wordle {
         letterToBeCheck.end());
     for (int i = 0; i < finder.size();) {
       int appearCnt = 0;
+      bool isCnted[30] = {0};
       for (auto j : finder[i])
         for (auto k : letterToBeCheck)
-          if (j == k) ++appearCnt;
-      if (appearCnt < (gameWordLength + 2) / 3 || finder[i] == lastGuess) {
+          if (j == k && !isCnted[k - 'a']) ++appearCnt, isCnted[k - 'a'] = 1;
+      if (appearCnt < gameWordLength * 2 / 3 || finder[i] == lastGuess) {
         std::swap(finder[i], finder.back());
         finder.pop_back();
       } else {
@@ -271,7 +275,7 @@ class Wordle {
 
     // Optimization settings
     if (ENABLE_OPTIMIZE) {
-      if (gameTurns >= 1 && gameTurns <= END_OPTIMIZE)
+      if (gameTurns >= BEGIN_OPTIMIZE && gameTurns <= END_OPTIMIZE)
         OPTIMIZE1 = true;
       else
         OPTIMIZE1 = false;
