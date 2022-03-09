@@ -13,19 +13,19 @@ int main(int argc, char *argv[]) {
   char optionName;
   int option = 0;
 
+  // Run without args
+  if (argc == 0) {
+    playWordle((1 << 2) | (1 << 11));
+    return 0;
+  }
+
   while (--argc > 0 && (*++argv)[0] == '-') {
     while (optionName = *++argv[0]) {
       switch (optionName) {
-        case 'W': // Wordle
-          option |= 1 << 0;
-          break;
-        case 'N': // Numberle
-          option |= 1 << 1;
-          break;
         case 'n': // New game
           option |= 1 << 2;
           break;
-        case 'c': // Continue game
+        case 'c': // Continue
           option |= 1 << 3;
           break;
         case 'd':
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
           option |= 1 << 30;
           break;
         default:
-          printf("Found: illegal optional %c\n", optionName);
+          printf("Found: illegal option -%c\n", optionName);
           argc = 0;
           option |= 1 << 31;
           break;
@@ -48,33 +48,28 @@ int main(int argc, char *argv[]) {
 
   if (option >> 31) {
     std::cout << "Illegal option found, try again or use -help for help.\n";
-  } else if (!option || option & (1 << 30)) {
-    std::cout << "    -W: play a wordle game. (default)\n"
-                 "    -N: play a numberle game.\n"
-                 "    -n: start a new game, the program will solve it "
+    return 0;
+  }
+  if (option & (1 << 2) && option & (1 << 3)) {
+    std::cout << "Option conflicted, use -help for help.\n";
+    return 0;
+  }
+  if (option & (1 << 30)) {
+    std::cout << "    -n: start a new game, the program will solve it "
                  "automatically. (default)\n"
                  "    -c: continue your game, input the information you "
-                 "already got and the program will show advice.\n"
+                 "already got and the program will give advice.\n"
                  "    -d: show details during game.\n"
                  "    -o: use experimental optimized algorithm, probably "
-                 "only works better when the word is short.";
-  } else if (option & (1 << 0) && option & (1 << 1) ||
-             option & (1 << 2) && option & (1 << 3)) {
-    std::cout << "Option conflicted, use -help for help.\n";
-  } else {
-    // Set default
-    if (!((option & (1 << 2)) | (option & (1 << 3))))
-      option |= 1 << 2;
-
-    if (!((option & (1 << 0)) | (option & (1 << 1))))
-      option |= 1 << 0;
-
-    if (option & (1 << 0)) {
-      playWordle(option);
-    } else {
-      std::cout << "Not done yet.\n";
-      // playNumberle(option);
-    }
+                 "only works better when the word is short. (Not available "
+                 "yet with -c)";
+    return 0;
   }
+
+  // Set default
+  if (!((option & (1 << 2)) | (option & (1 << 3))))
+    option |= 1 << 2;
+  playWordle(option);
+
   return 0;
 }
