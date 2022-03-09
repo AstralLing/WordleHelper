@@ -29,7 +29,7 @@ class Wordle {
   // Deny direct access to the dictionary to avoid accidental modifications,
   // only the index is provided.
   int gameTurns = 1, gameWordLength = 5;
-  std::string lastGuess;
+  std::string lastGuess, winIdentifier;
 
   void init(bool showDetail = false, bool useOptimizeSolution = false) {
     if (showDetail) ENABLE_DETAILS = true;
@@ -43,6 +43,7 @@ class Wordle {
       else
         break;
     }
+    for (int i = 1; i <= gameWordLength; ++i) winIdentifier += '1';
 
     // Initialize dictionary, source
     // @https://github.com/lorenbrichter/Words/blob/master/Words/en.txt
@@ -347,7 +348,7 @@ class newGame : public Wordle {
       std::cout << "- Enter the result: ";
       std::cin >> gameResult;
 
-      if (gameResult == "-1" || gameResult == "11111") break;
+      if (gameResult == "-1" || gameResult == winIdentifier) break;
 
       if (gameResult.size() != gameWordLength) {
         std::cout << "- Illegal input, try again.\n";
@@ -370,7 +371,7 @@ class newGame : public Wordle {
       ++gameTurns;
     }
 
-    if (gameResult == "-1" || gameResult == "11111") {
+    if (gameResult == "-1" || gameResult == winIdentifier) {
       std::cout << "- Niiiiiiiiice!\n";
     } else {
       std::cout << "- Unfortunately, this program cannot solve this problem, "
@@ -412,7 +413,7 @@ class continueGame : public Wordle {
       std::cout << "- Enter the result: ";
       std::cin >> gameResult;
 
-      if (gameResult == "-1" || gameResult == "11111") break;
+      if (gameResult == "-1" || gameResult == winIdentifier) break;
 
       if (gameResult.size() != gameWordLength) {
         std::cout << "- Illegal input, try again.\n";
@@ -443,7 +444,7 @@ class continueGame : public Wordle {
       std::cout << "- Enter the result: ";
       std::cin >> gameResult;
 
-      if (gameResult == "-1" || gameResult == "11111") break;
+      if (gameResult == "-1" || gameResult == winIdentifier) break;
 
       if (gameResult.size() != gameWordLength) {
         std::cout << "- Illegal input, try again.\n";
@@ -466,7 +467,7 @@ class continueGame : public Wordle {
       ++gameTurns;
     }
 
-    if (gameResult == "-1" || gameResult == "11111") {
+    if (gameResult == "-1" || gameResult == winIdentifier) {
       std::cout << "- Niiiiiiiiice!\n";
     } else {
       std::cout << "- Unfortunately, this program cannot solve this problem, "
