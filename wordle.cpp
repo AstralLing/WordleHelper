@@ -233,32 +233,6 @@ class Wordle {
         }
       }
     }
-
-    // Note: this may not work well. You can try it.
-    /*
-    if (OPTIMIZE1) {
-      for (int i = 0; i < sieve.size();) {
-        auto result = findLetter(sieve[i], letter);
-        if (result.size() < appearTimes) {  // Note: not wrongPos.size()
-          swap(sieve[i], sieve.back());
-          sieve.pop_back();
-        } else {
-          bool illegal = 0;
-          for (auto j : wrongPos)
-            if (sieve[i][j] == letter) {
-              illegal = 1;
-              break;
-            }
-          if (illegal) {
-            swap(sieve[i], sieve.back());
-            sieve.pop_back();
-          } else {
-            ++i;
-          }
-        }
-      }
-    }
-    */
   }
 
   void checkMoreThan(char letter, int appearTimes) {
