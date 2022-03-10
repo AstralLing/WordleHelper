@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
           option |= 1 << 30;
           break;
         default:
-          printf("Found: illegal optional %c\n", optionName);
+          printf("Found: illegal option -%c\n", optionName);
           argc = 0;
           option |= 1 << 31;
           break;
@@ -54,10 +54,11 @@ int main(int argc, char *argv[]) {
                  "    -n: start a new game, the program will solve it "
                  "automatically. (default)\n"
                  "    -c: continue your game, input the information you "
-                 "already got and the program will show advice.\n"
+                 "already got and the program will give advice.\n"
                  "    -d: show details during game.\n"
                  "    -o: use experimental optimized algorithm, probably "
-                 "only works better when the word is short.";
+                 "only works better when the word is short. (Not available "
+                 "with -c)";
   } else if (option & (1 << 0) && option & (1 << 1) ||
              option & (1 << 2) && option & (1 << 3)) {
     std::cout << "Option conflicted, use -help for help.\n";
@@ -72,7 +73,7 @@ int main(int argc, char *argv[]) {
     if (option & (1 << 0)) {
       playWordle(option);
     } else {
-      std::cout << "Not done yet.\n";
+      std::cout << "Not supported yet.\n";
       // playNumberle(option);
     }
   }
