@@ -1,17 +1,15 @@
 #### WordleHelper
 A simple wordle game helper with better algorithm. Release edition is coming soon:)
 
-Early build:
+build:
 ```
-g++ wlh.h main.cpp wordle.cpp -o <BinaryFileName> -std=c++17 -O2
+g++ wlh.h main.cpp wordle.cpp -o <BinaryFileName> -std=c++17 -O2 -static
 ```
 
 To let the program recognize dictionary files, putting them(your customized or default in this repo) in the same folder, files named `<[0,7]>.txt`.
 
 #### cli help
 ```
-    -W: play a wordle game. (default)
-    -N: play a numberle game.
     -n: start a new game, the program will solve it automatically. (default)
     -c: continue your game, input the information you already got and the program will show advice.
     -d: show details during game.

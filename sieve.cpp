@@ -1,3 +1,6 @@
+//
+// This is a tool to separate words of different lengths from a large dictionary.
+//
 #include <array>
 #include <cstring>
 #include <vector>

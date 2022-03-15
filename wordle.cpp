@@ -1,40 +1,45 @@
 #include "wlh.h"
+using std::cin;
+using std::cout;
+using std::string;
+using std::vector;
 
 class Wordle {
  private:
-  const std::string BEST[8] = {"taes",       "crane",      "visaed",
-                               "spaeing",    "dioptase",   "kopasetic",
-                               "proteinase", "seaborgiums"};
+  const string BEST[8] = {"taes",     "crane",     "visaed",     "spaeing",
+                          "dioptase", "kopasetic", "proteinase", "seaborgiums"};
   const int MIN_WORD_LENGTH = 4, MAX_WORD_LENGTH = 11, BEGIN_OPTIMIZE1 = 1,
-            END_OPTIMIZE1 = 3;  // Begin and end pos are both effective in the next turn (actually [2,4])
+            END_OPTIMIZE1 = 3;  // Begin and end pos are both effective in the
+                                // next turn (actually [2,4])
 
-  // Optimize1: tmp cancel the limit of '2'. Optimize2: only find the last letters.
+  // Optimize1: tmp cancel the limit of '2'. Optimize2: Restrict the search to
+  // the unsure letters.
   bool ENABLE_DETAILS = false, ENABLE_OPTIMIZE = false, OPTIMIZE1 = false,
        OPTIMIZE2 = false;
 
   int modeInfo[10];
 
   // Origin, optimize 1, optimize 2
-  std::vector<std::string> dictionary, sieve, finder;
+  vector<string> dictionary, sieve, finder;
 
   // Customized string.find()
-  static inline std::vector<int> findLetter(std::string S, char letter) {
-    std::vector<int> result;
+  static inline vector<int> findLetter(string S, char letter) {
+    vector<int> result;
     for (int i = 0; i < S.size(); ++i)
       if (S[i] == letter) result.push_back(i);
     return result;
   }
 
   // Word finder
-  std::string generateWord(std::vector<std::string> source) {
-    auto check = [&](const std::string &S) {
+  string generateWord(vector<string> source) {
+    auto check = [&](const string &S) {
       for (auto i : S)
         if (findLetter(S, i).size() > 1) return 0;
       return 1;
     };
 
     int randomCnt = 0;
-    std::string result; 
+    string result;
 
     do {
       ++randomCnt;
@@ -70,20 +75,21 @@ class Wordle {
     }
 
     // Last game wasn't optimized, use optimize 2.
-    std::vector<char> letterToBeCheck;
-    for (auto i : dictionary) {
-      for (auto j : i) {
-        auto result = findLetter(lastWord, j);
-        if (result.empty()) letterToBeCheck.push_back(j);
-      }
+    vector<char> letterToBeCheck;
+    for (int i = 0; i < gameWordLength; ++i) {
+      if (lastResult[i] == '0')
+        for (auto j : dictionary)
+          letterToBeCheck.push_back(j[i]);
     }
     std::sort(letterToBeCheck.begin(), letterToBeCheck.end());
     letterToBeCheck.erase(
         std::unique(letterToBeCheck.begin(), letterToBeCheck.end()),
         letterToBeCheck.end());
+
+    vector<string> finderCopy = finder;
     for (int i = 0; i < finder.size();) {
       int appearCnt = 0;
-      bool isCnted[30] = {0};
+      bool isCnted[26] = {0};
       for (auto j : finder[i])
         for (auto k : letterToBeCheck)
           if (j == k && !isCnted[k - 'a']) ++appearCnt, isCnted[k - 'a'] = 1;
@@ -95,12 +101,28 @@ class Wordle {
       }
     }
 
+    if (finder.empty() && letterToBeCheck.size() < 7) {
+      for (int i = 0; i < finderCopy.size();) {
+        int appearCnt = 0;
+        bool isCnted[26] = {0};
+        for (auto j : finderCopy[i])
+          for (auto k : letterToBeCheck)
+            if (j == k && !isCnted[k - 'a']) ++appearCnt, isCnted[k - 'a'] = 1;
+        if (appearCnt < gameWordLength - 2 || finderCopy[i] == lastWord) {
+          std::swap(finderCopy[i], finderCopy.back());
+          finderCopy.pop_back();
+        } else {
+          ++i;
+        }
+      }
+      finder = finderCopy;
+    }
+
     return !finder.empty();
   }
 
   void checkNonExist(char letter) {
-    if (ENABLE_DETAILS)
-      std::cout << "Checking: " << letter << " does not exist.\n";
+    if (ENABLE_DETAILS) cout << "Checking: " << letter << " does not exist.\n";
 
     for (int i = 0; i < dictionary.size();) {
       auto result = findLetter(dictionary[i], letter);
@@ -127,7 +149,7 @@ class Wordle {
 
   void checkConfirmed(int pos, char letter) {
     if (ENABLE_DETAILS)
-      std::cout << "Checking: " << letter << " at " << pos + 1 << ".\n";
+      cout << "Checking: " << letter << " at " << pos + 1 << ".\n";
 
     for (int i = 0; i < dictionary.size();) {
       if (dictionary[i][pos] != letter) {
@@ -151,10 +173,10 @@ class Wordle {
     }
   }
 
-  void checkAppear(std::vector<int> wrongPos, char letter, int appearTimes) {
+  void checkAppear(vector<int> wrongPos, char letter, int appearTimes) {
     if (ENABLE_DETAILS)
-      std::cout << "Checking: " << letter << " appears " << appearTimes
-                << " times.\n";
+      cout << "Checking: " << letter << " appears " << appearTimes
+           << " times.\n";
 
     for (int i = 0; i < dictionary.size();) {
       auto result = findLetter(dictionary[i], letter);
@@ -196,8 +218,8 @@ class Wordle {
 
   void checkMoreThan(char letter, int appearTimes) {
     if (ENABLE_DETAILS)
-      std::cout << "Checking: " << letter << " appears less than "
-                << appearTimes << " times.\n";
+      cout << "Checking: " << letter << " appears less than " << appearTimes
+           << " times.\n";
 
     for (int i = 0; i < dictionary.size();) {
       auto result = findLetter(dictionary[i], letter);
@@ -228,18 +250,18 @@ class Wordle {
   const int MAX_GAME_TURNS = 6;
 
   int gameTurns = 0, gameWordLength;
-  std::string winIdentifier, lastWord;
+  string winIdentifier, lastWord, lastResult;
 
   // Initialize a game.
   void init(bool showDetail = false, bool useOptimizeSolution = false) {
     if (showDetail) ENABLE_DETAILS = true;
     if (useOptimizeSolution) ENABLE_OPTIMIZE = true;
 
-    std::cout << "* Wordle on! Enter the length of your word.\n";
+    cout << "* Wordle on! Enter the length of your word.\n";
     while (1) {
-      std::cin >> gameWordLength;
+      cin >> gameWordLength;
       if (gameWordLength < MIN_WORD_LENGTH || gameWordLength > MAX_WORD_LENGTH)
-        std::cout << "* Error! Length should be on [4,11].\n";
+        cout << "* Error! Length should be on [4,11].\n";
       else
         break;
     }
@@ -248,8 +270,8 @@ class Wordle {
     // Initialize dictionary, source
     // @https://github.com/lorenbrichter/Words/blob/master/Words/en.txt
     std::ifstream fin;
-    std::string inputWords;
-    std::string requireDic = {"0.txt"};
+    string inputWords;
+    string requireDic = {"0.txt"};
     requireDic[0] = gameWordLength - 4 + '0';
     fin.open(requireDic);
     while (fin >> inputWords) dictionary.push_back(inputWords);
@@ -279,7 +301,7 @@ class Wordle {
   // Generate a random word from the current dictionary.
   void guess() {
     if (dictionary.empty()) {
-      std::cout << "* Oops! No matching words found. Plz add a issue.\n";
+      cout << "* Oops! No matching words found. Plz add a issue.\n";
       exit(-1);
     }
 
@@ -288,21 +310,19 @@ class Wordle {
       // Make the first guess. You can modify the "best" starting word
       // as your idea.
       if (ENABLE_DETAILS)
-        std::cout << "* Remaining " << dictionary.size() << " possible words.\n";
+        cout << "* Remaining " << dictionary.size() << " possible words.\n";
 
-      std::cout << "* Guess: " << BEST[gameWordLength - 4] << "\n";
+      cout << "* Guess: " << BEST[gameWordLength - 4] << "\n";
       lastWord = BEST[gameWordLength - 4];
 
       return;
     }
 #endif
 
-    // Play
     if (ENABLE_DETAILS) {
-      std::cout << "* Remaining " << dictionary.size() << " possible words:\n";
-      for (auto i : dictionary)
-        std::cout << i << " ";
-      std::cout << "\n";
+      cout << "* Remaining " << dictionary.size() << " possible words:\n";
+      for (auto i : dictionary) cout << i << " ";
+      cout << "\n";
     }
 
     bool optimizedFlag = 0;
@@ -310,39 +330,41 @@ class Wordle {
     if (ENABLE_OPTIMIZE) {
       if (OPTIMIZE2 && dictionary.size() < 100 && dictionary.size() > 2) {
         if (reduceFinder()) {
-          std::cout << "* Guess: " << (lastWord = generateWord(finder)) << "\n";
+          cout << "* Guess: " << (lastWord = generateWord(finder)) << "\n";
           modeInfo[gameTurns] = 2;
           optimizedFlag = 1;
         }
       }
-      if (!optimizedFlag && OPTIMIZE1 && !sieve.empty() && dictionary.size() > 5) {
-        std::cout << "* Guess: " << (lastWord = generateWord(sieve)) << "\n";
+      if (!optimizedFlag && OPTIMIZE1 && !sieve.empty() &&
+          dictionary.size() > 5) {
+        cout << "* Guess: " << (lastWord = generateWord(sieve)) << "\n";
         modeInfo[gameTurns] = 1;
         optimizedFlag = 1;
       }
     }
 
     if (optimizedFlag) {
-      if (ENABLE_DETAILS) std::cout << "* Optimized.\n";
+      if (ENABLE_DETAILS) cout << "* Optimized.\n";
     } else {
-      std::cout << "* Guess: " << (lastWord = generateWord(dictionary)) << "\n";
+      cout << "* Guess: " << (lastWord = generateWord(dictionary)) << "\n";
     }
 
     return;
   }
 
   // Update dictionary by any word and its result.
-  void solveGame(std::string gameResult, std::string gameWord) {
-    std::map<char, std::vector<int>> wrongPos;
+  void solveGame(string gameWord) {
+    std::map<char, vector<int>> wrongPos;
     std::map<char, int> letterCnt;
-    std::vector<char> receivedZero;
+    vector<char> receivedZero;
     int confirmedCnt = 0, nonCnt = 0;
 
-    for (int i = 0; i < gameResult.size(); ++i) {
-      if (gameResult[i] == '0')
+    for (int i = 0; i < lastResult.size(); ++i) {
+      if (lastResult[i] == '0')
         receivedZero.push_back(gameWord[i]), ++nonCnt;
-      else if (gameResult[i] == '1')
-        checkConfirmed(i, gameWord[i]), ++letterCnt[gameWord[i]], ++confirmedCnt;
+      else if (lastResult[i] == '1')
+        checkConfirmed(i, gameWord[i]), ++letterCnt[gameWord[i]],
+            ++confirmedCnt;
       else
         wrongPos[gameWord[i]].push_back(i), ++letterCnt[gameWord[i]];
     }
@@ -351,72 +373,70 @@ class Wordle {
       if (letterCnt[i] == 0)
         checkNonExist(i);
       else
-        checkMoreThan(i, letterCnt[i]);  // Only received zero can get its cnt.
+        checkMoreThan(i, letterCnt[i]);  // According to Wordle's rule
 
     for (auto i : wrongPos)
       if (i.second.size() > 0)
         checkAppear(i.second, i.first, letterCnt[i.first]);
 
-    // Next turn optimization settings
+    // Optimize for the next turn
     if (ENABLE_OPTIMIZE) {
-      if (gameTurns >= BEGIN_OPTIMIZE1 && gameTurns <= END_OPTIMIZE1 && nonCnt > gameWordLength * 2 / 3)
+      if (gameTurns >= BEGIN_OPTIMIZE1 && gameTurns <= END_OPTIMIZE1 &&
+          nonCnt > gameWordLength * 2 / 3)
         OPTIMIZE1 = true;
       else
         OPTIMIZE1 = false;
 
       if (confirmedCnt >= (gameWordLength + 1) / 2 || gameTurns > END_OPTIMIZE1)
         OPTIMIZE2 = true, OPTIMIZE1 = false;
-      if (gameTurns == MAX_GAME_TURNS - 1)
-        OPTIMIZE2 = false;
+      if (gameTurns == MAX_GAME_TURNS - 1) OPTIMIZE2 = false;
     }
   }
 };
 
 class newGame : public Wordle {
- private:
-  std::string gameResult;
-
  public:
   void play(int option) {
-    std::cout << "- Usage: 0 means not exist, 1 means correct, 2 means wrong "
-                 "position. e.g.\"01201\".\n  If guessed right, enter a single "
-                 "\"-1\" to close the game.\n";
+    cout << "- Usage: 0 means not exist, 1 means correct, 2 means wrong "
+            "position. e.g.\"01201\".\n  Enter a single \"-1\" can close "
+            "the game.\n";
     init(option & (1 << 10), option & (1 << 11));
 
     while (++gameTurns <= MAX_GAME_TURNS) {
       guess();
 
-      std::cout << "- Enter the results: ";
-      std::cin >> gameResult;
+      cout << "- Enter the results: ";
+      cin >> lastResult;
 
-      if (gameResult == "-1" || gameResult == winIdentifier) break;
+      if (lastResult == "-1" || lastResult == winIdentifier) break;
 
-      if (gameResult.size() != gameWordLength) {
-        std::cout << "- Illegal input, try again.\n";
+      if (lastResult.size() != gameWordLength) {
+        cout << "- Illegal input, try again.\n";
         continue;
       }
 
       bool illegal = 0;
-      for (auto i : gameResult)
+      for (auto i : lastResult)
         if (i != '0' && i != '1' && i != '2') {
           illegal = 1;
           break;
         }
       if (illegal) {
-        std::cout << "- Illegal input, try again.\n";
+        cout << "- Illegal input, try again.\n";
         continue;
       }
 
-      solveGame(gameResult, lastWord);
+      solveGame(lastWord);
     }
 
-    if (gameResult == "-1" || gameResult == winIdentifier) {
-      std::cout << "- Niiiiiiiiice!\n";
+    if (lastResult == "-1" || lastResult == winIdentifier) {
+      cout << "- Niiiice!!\n";
     } else {
-      std::cout << "- Unfortunately, this program cannot solve this problem in " 
-                << MAX_GAME_TURNS << " turns, you can try to change the random "
-                "seed or provides the answer in issues. The algorithm will be "
-                "optimized in the future.\n";
+      cout << "- Unfortunately, this program cannot solve this problem in "
+           << MAX_GAME_TURNS
+           << " turns, you can try to change the random "
+              "seed or provides the answer in issues. The algorithm will be "
+              "optimized in the future.\n";
     }
   }
 };
@@ -425,90 +445,89 @@ class newGame : public Wordle {
 class continueGame : public Wordle {
  private:
   int alreadyTurns;
-  std::string userWord, gameResult;
+  string userWord;
 
  public:
   void play(int option) {
-    std::cout << "- Usage: 0 means not exist, 1 means correct, 2 means wrong "
-                 "position. e.g.\"01201\".\n  If guessed right, enter a single "
-                 "\"-1\" to close the game.\n";
+    cout << "- Usage: 0 means not exist, 1 means correct, 2 means wrong "
+            "position. e.g.\"01201\".\n  Enter a single \"-1\" can close "
+            "the game.\n";
     init(option & (1 << 10));
 
-    std::cout << "- Enter the times you have guessed.\n";
+    cout << "- Enter the times you have guessed.\n";
     do {
-      std::cin >> alreadyTurns;
+      cin >> alreadyTurns;
     } while (alreadyTurns < 0 || alreadyTurns >= MAX_GAME_TURNS);
 
     while (++gameTurns <= alreadyTurns) {
-      std::cout << "- Enter the word you guessed in turn " << gameTurns
-                << ".\n";
-      std::cin >> userWord;
+      cout << "- Enter the word you guessed in turn " << gameTurns << ".\n";
+      cin >> userWord;
 
       if (userWord.size() != gameWordLength) {
-        std::cout << "- Illegal input, try again.\n";
+        cout << "- Illegal input, try again.\n";
         continue;
       }
 
-      std::cout << "- Enter the results: ";
-      std::cin >> gameResult;
+      cout << "- Enter the results: ";
+      cin >> lastResult;
 
-      if (gameResult == "-1" || gameResult == winIdentifier) break;
+      if (lastResult == "-1" || lastResult == winIdentifier) break;
 
-      if (gameResult.size() != gameWordLength) {
-        std::cout << "- Illegal input, try again.\n";
+      if (lastResult.size() != gameWordLength) {
+        cout << "- Illegal input, try again.\n";
         continue;
       }
 
       bool illegal = 0;
-      for (auto i : gameResult)
+      for (auto i : lastResult)
         if (i != '0' && i != '1' && i != '2') {
           illegal = 1;
           break;
         }
       if (illegal) {
-        std::cout << "- Illegal input, try again.\n";
+        cout << "- Illegal input, try again.\n";
         continue;
       }
 
-      solveGame(gameResult, userWord);
+      solveGame(userWord);
     }
 
-    std::cout << "- Data loaded, program start.\n";
+    cout << "- Data loaded, program start.\n";
 
     while (++gameTurns <= MAX_GAME_TURNS) {
       guess();
 
-      std::cout << "- Enter the results: ";
-      std::cin >> gameResult;
+      cout << "- Enter the results: ";
+      cin >> lastResult;
 
-      if (gameResult == "-1" || gameResult == winIdentifier) break;
+      if (lastResult == "-1" || lastResult == winIdentifier) break;
 
-      if (gameResult.size() != gameWordLength) {
-        std::cout << "- Illegal input, try again.\n";
+      if (lastResult.size() != gameWordLength) {
+        cout << "- Illegal input, try again.\n";
         continue;
       }
 
       bool illegal = 0;
-      for (auto i : gameResult)
+      for (auto i : lastResult)
         if (i != '0' && i != '1' && i != '2') {
           illegal = 1;
           break;
         }
       if (illegal) {
-        std::cout << "- Illegal input, try again.\n";
+        cout << "- Illegal input, try again.\n";
         continue;
       }
 
-      solveGame(gameResult, lastWord);
+      solveGame(lastWord);
     }
 
-    if (gameResult == "-1" || gameResult == winIdentifier) {
-      std::cout << "- Niiiiiiiiice!\n";
+    if (lastResult == "-1" || lastResult == winIdentifier) {
+      cout << "- Niiiice!!\n";
     } else {
-      std::cout << "- Unfortunately, this program cannot solve this problem in " 
-                << MAX_GAME_TURNS << " turns, you can try to change the random "
-                "seed or provides the answer in issues. The algorithm will be "
-                "optimized in the future.\n";
+      cout << "- Unfortunately, this program cannot solve this problem in "
+           << MAX_GAME_TURNS << " turns, you can try to change the random "
+              "seed or provides the answer in issues. The algorithm will be "
+              "optimized in the future.\n";
     }
   }
 };

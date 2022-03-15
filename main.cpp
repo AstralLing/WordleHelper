@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
   int option = 0;
 
   // Run without args
-  if (argc == 0) {
+  if (argc == 1) {
     playWordle((1 << 2) | (1 << 11));
     return 0;
   }
