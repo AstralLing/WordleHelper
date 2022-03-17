@@ -1,0 +1,16 @@
+Wordle 271 4/6
+
+⬜⬜⬜⬜🟩
+⬜⬜🟨⬜⬜
+⬜⬜🟨🟨⬜
+🟩🟩🟩🟩🟩
+
+wlh: 1.0.0-beta1
+seed: NeverKnowsBest.
+hash: (basic)
+
+Guess:
+- crane
+- thous
+- blimp
+- movie
