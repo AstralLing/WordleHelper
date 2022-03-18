@@ -9,7 +9,7 @@ Wordle 270 6/6
 
 wlh: alpha3.2.2.220315
 seed: NeverKnowsBest.
-hash: (basic)
+dictionary: (basic)
 
 Guess:
 - crane

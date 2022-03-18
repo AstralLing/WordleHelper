@@ -27,4 +27,8 @@ g++ wlh.h main.cpp wordle.cpp -o <BinaryFileName> -std=c++17 -O2 -static
 #### 关于
 优化算法的目标主要是避开一些非常糟糕的情况，例如已经确定单词的后四个字母是 `irth` 时，朴素算法必须枚举 `birth`，`mirth`，`firth` 等词语，但显然寻找一个同时包含 `b`，`m`，`f` 等字母的单词是更优秀的选择。
 
-[这里](https://wordlegame.org/)和[这里](https://www.nytimes.com/games/wordle/index.html)都免费提供很棒的在线 Wordle 游戏，GLHF :)
+[这里](https://wordlegame.org/)和[这里](https://www.nytimes.com/games/wordle/index.html)都免费提供很棒的在线 Wordle 游戏。
+
+此 repo 的 `results` 目录下会每天更新[这里](https://www.nytimes.com/games/wordle/index.html)的 Wordle 解决过程。因为程序使用的默认词库比此网站的词库大得多，它的解题效率可能略慢于预期。如果你想自己玩每日 Wordle 游戏，不要点开它！
+
+GLHF :)

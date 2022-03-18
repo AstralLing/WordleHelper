@@ -7,7 +7,7 @@ Wordle 272 4/6
 
 wlh: 1.0.0-beta1
 seed: NeverKnowsBest.
-hash: (basic)
+dictionary: (basic)
 
 Guess:
 - crane
