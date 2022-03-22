@@ -1,0 +1,18 @@
+Wordle 276 5/6
+
+⬜⬜⬜⬜⬜
+⬜🟨⬜⬜🟨
+🟩🟩🟩⬜⬜
+⬜🟨🟨🟨⬜
+🟩🟩🟩🟩🟩
+
+wlh: 1.0.0-beta1
+seed: NeverKnowsBest.
+dictionary: (basic)
+
+Guess:
+- crane
+- gowfs
+- sloyd
+- gosht
+- slosh
