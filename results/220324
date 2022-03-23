@@ -1,0 +1,14 @@
+Wordle 278 3/6
+
+🟩⬜⬜⬜🟨
+🟩⬜🟩⬜🟨
+🟩🟩🟩🟩🟩
+
+wlh: 1.0.0-beta1
+seed: NeverKnowsBest.
+dictionary: (basic)
+
+Guess:
+- crane
+- coeds
+- chest
