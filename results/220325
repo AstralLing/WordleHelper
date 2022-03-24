@@ -1,0 +1,16 @@
+Wordle 279 4/6
+
+⬜⬜⬜⬜🟨
+⬜⬜⬜🟨🟨
+🟩🟩⬜🟩🟩
+🟩🟩🟩🟩🟩
+
+wlh: 1.0.0-beta1
+seed: NeverKnowsBest.
+dictionary: (basic)
+
+Guess:
+- crane
+- wised
+- devot
+- depot
