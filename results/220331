@@ -1,0 +1,18 @@
+Wordle 285 5/6
+
+⬜⬜⬜⬜⬜
+⬜🟩🟩🟩⬜
+⬜🟩🟩🟩🟩
+⬜🟩🟩🟩🟩
+🟩🟩🟩🟩🟩
+
+wlh: 1.0.0-beta1
+seed: TransRightsAreHumanRights
+dictionary: (basic)
+
+Guess:
+- crane
+- gowls
+- jowly
+- dowly
+- lowly
